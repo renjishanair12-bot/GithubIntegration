@@ -1,0 +1,30 @@
+
+var query =
+  "closed_at>=javascript:gs.dateGenerate('2026-01-30','00:00:00')" +
+  "^assignment_group=49add8360f7335003c10244be1050e21";
+  //41add8360f7335003c10244be1050e23
+  //49add8360f7335003c10244be1050e21
+
+var grTask = new GlideRecord('sc_task');
+grTask.addEncodedQuery(query);
+grTask.query();
+
+while (grTask.next()) {
+
+    var slaAgg = new GlideAggregate('task_sla');
+    slaAgg.addQuery('task', grTask.sys_id);
+    slaAgg.addAggregate('COUNT');
+    slaAgg.query();
+
+    if (slaAgg.next()) {
+        var count = parseInt(slaAgg.getAggregate('COUNT'), 10);
+
+        if (count > 2) {
+            gs.print(
+                'Task Number: ' + grTask.number +
+                ' | SLA Count: ' + count +
+                ' | Closed At: ' + grTask.closed_at.getDisplayValue()
+            );
+        }
+    }
+}
